@@ -146,10 +146,27 @@ app.post('/tg-webhook', async (req, res) => {
     await tgEdit(cb.message.chat.id, cb.message.message_id,
       `*Заявку ПІДТВЕРДЖЕНО*\n\nІмʼя: ${booking.name}\nТелефон: ${booking.phone}\nЗаїзд: ${fmt(booking.checkin)} → Виїзд: ${fmt(booking.checkout)}\nСума: ₴ ${Number(booking.total).toLocaleString('uk-UA')}`
     );
+    // Send separate message with cancel button
+    await tgSend({
+      chat_id: TG_CHAT,
+      text: `*Бронювання активне*\n\n${booking.name} · ${fmt(booking.checkin)} — ${fmt(booking.checkout)}\n\nЯкщо потрібно скасувати — натисни кнопку нижче.`,
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '🚫 Скасувати бронювання', callback_data: `cancel:${id}` }
+        ]]
+      }
+    });
   } else if (action === 'reject') {
     booking.status = 'rejected';
     await tgEdit(cb.message.chat.id, cb.message.message_id,
       `*Заявку ВІДХИЛЕНО*\n\nІмʼя: ${booking.name} · ${fmt(booking.checkin)} — ${fmt(booking.checkout)}`
+    );
+  } else if (action === 'cancel') {
+    if (booking.status !== 'confirmed') return;
+    booking.status = 'cancelled';
+    await tgEdit(cb.message.chat.id, cb.message.message_id,
+      `*Бронювання СКАСОВАНО*\n\nІмʼя: ${booking.name}\nЗаїзд: ${fmt(booking.checkin)} → Виїзд: ${fmt(booking.checkout)}\nДати звільнено на календарі.`
     );
   }
 
