@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: dzendzо-server
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: TG_TOKEN
+        value: 8736490478:AAHHTrcGh7rNduXgEo3Z6vhUWf4YZsEx3dM
+      - key: TG_CHAT
+        value: "8226543606"
+      - key: WEBHOOK_URL
+        sync: false   # fill in after first deploy — paste your Render URL here
